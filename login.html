@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Wallet Login</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load the pixel/retro font 'Press Start 2P' -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        /* Define custom retro font class */
+        .retro-font {
+            font-family: 'Press Start 2P', cursive;
+            text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- New Retro Frame Style (Soft and Rounded) --- */
+        .retro-frame {
+            background-color: #F3F4F6; /* Light gray base */
+            border: 6px solid #4B5563; /* Dark gray border */
+            border-radius: 1.5rem; /* Large rounded corners */
+            padding: 2.5rem;
+            /* Creates a thick, smooth 3D casing effect */
+            box-shadow: 0 10px 0 #1F2937, 0 15px 0 #111827;
+        }
+
+        /* Input Field Style: Add padding to the right for the eye icon */
+        .input-style {
+            border: 3px solid #1F2937;
+            background: #E5E7EB; /* Off-white input area */
+            border-radius: 0.5rem;
+            padding: 0.75rem 3rem 0.75rem 0.75rem; /* Added right padding (3rem) */
+            font-size: 0.75rem;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.1s;
+        }
+
+            .input-style:focus {
+                outline: 2px solid #FBBF24; /* Amber focus outline */
+                outline-offset: -3px;
+            }
+
+        /* Eye icon button positioning */
+        .password-toggle-button {
+            top: 50%;
+            transform: translateY(-50%);
+            right: 0.5rem;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* --- Custom Button Style (Based on the Image) --- */
+        .cartoon-button {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #FBBF24; /* Amber 400 - Main Yellow */
+            border: 4px solid #92400E; /* Dark Brown border */
+            border-radius: 9999px; /* Full rounded corners */
+            color: #92400E; /* Dark Brown Text */
+            text-shadow: 1px 1px 0 #fff; /* White text shadow for text contrast */
+            padding: 0.75rem 1.5rem;
+            line-height: 1;
+            transition: all 0.1s ease;
+            font-size: 0.8rem;
+            /* 3D and Gloss Effect */
+            box-shadow: 0 6px 0 0 #92400E, /* Bottom Shadow for depth */
+            inset 0 4px 6px -1px rgba(255, 255, 255, 0.6), /* Top-Left Highlight/Gloss */
+            inset 0 -4px 6px -1px rgba(0, 0, 0, 0.2); /* Bottom-Right Inner Shadow */
+        }
+
+        /* Make the "Start Game" button green for success */
+        #start-game-button {
+            background-color: #10B981; /* Emerald 500 - Green */
+            border-color: #065F46; /* Emerald 800 - Darker Green */
+            color: #065F46; /* Darker Green Text */
+            box-shadow: 0 6px 0 0 #065F46, inset 0 4px 6px -1px rgba(255, 255, 255, 0.6), inset 0 -4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        .cartoon-button:active {
+            /* Press effect: move down and hide the bottom shadow */
+            transform: translateY(6px);
+            box-shadow: 0 0px 0 0 #92400E, inset 0 4px 6px -1px rgba(255, 255, 255, 0.6), inset 0 -4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Custom shake animation for error/loading */
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+
+            20%, 60% {
+                transform: translateX(-5px);
+            }
+
+            40%, 80% {
+                transform: translateX(5px);
+            }
+        }
+
+        .shake-animation {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 640px) {
+            .retro-frame {
+                border-radius: 1rem;
+                padding: 1.5rem;
+            }
+
+            .retro-font {
+                font-size: 0.75rem;
+            }
+
+            .cartoon-button {
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body class="relative min-h-screen flex items-center justify-center p-4"
+      style="
+        background-image: url('back2.png');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-attachment: fixed;
+      ">
+    <!-- Login/Signup Window -->
+    <div id="auth-modal"
+         class="retro-frame w-full max-w-sm mx-auto flex flex-col space-y-6">
+
+        <!-- Header -->
+        <h1 id="header-title" class="retro-font text-2xl text-gray-900 text-center uppercase tracking-wider mb-2">
+            CONNECT WALLET
+        </h1>
+
+        <!-- Wallet Connection Section -->
+        <div id="wallet-connection" class="space-y-4">
+            <div class="text-center">
+                <p class="retro-font text-xs text-gray-700 mb-4">Connect your Sui wallet to continue</p>
+
+                <!-- Wallet Connection Button -->
+                <button id="connect-wallet-btn" class="cartoon-button w-full mb-3">
+                    CONNECT SUI WALLET
+                </button>
+
+                <button id="install-wallet-btn" class="cartoon-button w-full" style="background-color: #3B82F6; border-color: #1E40AF; color: #1E40AF;">
+                    INSTALL SUI WALLET
+                </button>
+
+                <!-- Demo Mode Button -->
+                <button id="demo-mode-btn" class="cartoon-button w-full mt-4" style="background-color: #8B5CF6; border-color: #6D28D9; color: #6D28D9;">
+                    DEMO MODE (TEST)
+                </button>
+            </div>
+
+            <!-- Wallet Info (Hidden initially) -->
+            <div id="wallet-info" class="hidden text-center space-y-2">
+                <div class="retro-font text-xs text-gray-700">
+                    Connected: <span id="wallet-address" class="text-green-600"></span>
+                </div>
+                <div class="retro-font text-xs text-gray-700">
+                    Status: <span id="wallet-status" class="text-green-600">Ready to play!</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUCCESS SCREEN -->
+        <div id="success-screen" class="hidden text-center space-y-4 pt-4 pb-4">
+            <h2 id="success-title" class="retro-font text-xl text-green-700 uppercase">WALLET CONNECTED!</h2>
+            <p id="success-message-text" class="retro-font text-xs text-gray-800">
+                Your Sui wallet is securely connected to OneChain. Ready to play!
+            </p>
+            <button id="start-game-button" class="cartoon-button uppercase w-full h-14 mt-4">
+                Start Game
+            </button>
+        </div>
+
+        <!-- Status Message Box -->
+        <div id="status-message"
+             class="retro-font text-xs text-center text-gray-600 p-2 min-h-[20px]">
+            Click "CONNECT SUI WALLET" to begin.
+        </div>
+
+        <!-- Manual Address Input (Fallback) -->
+        <div id="manual-address" class="hidden space-y-2">
+            <label class="retro-font text-xs text-gray-700 block">Or enter address manually (0x + 64 hex chars):</label>
+            <input type="text" id="address-input" placeholder="0x02a212de6a9dfa3a69e22387acfbafbb1a9e591bd9d636e7895dcfc8de05f331"
+                   class="input-style retro-font w-full text-gray-800 placeholder-gray-500">
+            <button id="use-address-btn" class="cartoon-button w-full text-xs">
+                USE THIS ADDRESS
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // === Global State ===
+        let currentAddress = null;
+
+        // === Utility Functions ===
+        function showStatus(message, colorClass = 'text-gray-600') {
+            const statusElement = document.getElementById('status-message');
+            statusElement.classList.remove('text-red-600', 'text-green-600', 'text-yellow-600', 'text-gray-600');
+            statusElement.classList.add(colorClass);
+            statusElement.textContent = message;
+        }
+
+        function showSuccessScreen() {
+            document.getElementById('wallet-connection').classList.add('hidden');
+            document.getElementById('success-screen').classList.remove('hidden');
+            document.getElementById('manual-address').classList.add('hidden');
+            showStatus('Wallet connected successfully!', 'text-green-600');
+        }
+
+        // === Wallet Connection ===
+        async function connectSuiWallet() {
+            try {
+                if (!window.sui) {
+                    showStatus('Sui wallet not detected. Please install Sui Wallet.', 'text-red-600');
+                    document.getElementById('manual-address').classList.remove('hidden');
+                    return;
+                }
+
+                showStatus('Connecting to Sui wallet...', 'text-yellow-600');
+
+                // Request connection
+                const accounts = await window.sui.requestPermissions();
+
+                if (accounts && accounts.length > 0) {
+                    currentAddress = accounts[0];
+                    updateWalletInfo();
+                    showSuccessScreen();
+                } else {
+                    showStatus('Connection rejected by user.', 'text-red-600');
+                }
+            } catch (error) {
+                console.error('Wallet connection error:', error);
+                showStatus('Failed to connect: ' + error.message, 'text-red-600');
+                document.getElementById('auth-modal').classList.add('shake-animation');
+                setTimeout(() => document.getElementById('auth-modal').classList.remove('shake-animation'), 500);
+            }
+        }
+
+        function updateWalletInfo() {
+            if (!currentAddress) return;
+
+            document.getElementById('wallet-address').textContent =
+                currentAddress.substring(0, 8) + '...' + currentAddress.substring(currentAddress.length - 6);
+
+            document.getElementById('wallet-info').classList.remove('hidden');
+        }
+
+        // === Demo Mode ===
+        function enableDemoMode() {
+            currentAddress = '0x02a212de6a9dfa3a69e22387acfbafbb1a9e591bd9d636e7895dcfc8de05f331';
+            showStatus('Demo mode activated with test address', 'text-green-600');
+            updateWalletInfo();
+            showSuccessScreen();
+        }
+
+        // === Manual Address Fallback ===
+        function useManualAddress() {
+            const address = document.getElementById('address-input').value.trim();
+            const oneChainAddressRegex = /^0x[0-9a-fA-F]{64}$/;
+
+            if (address && oneChainAddressRegex.test(address)) {
+                currentAddress = address;
+                showStatus('Using manual address: ' + address.substring(0, 8) + '...', 'text-green-600');
+                updateWalletInfo();
+                showSuccessScreen();
+            } else {
+                showStatus('Invalid OneChain address. Must be 0x + 64 hex characters.', 'text-red-600');
+                document.getElementById('auth-modal').classList.add('shake-animation');
+                setTimeout(() => document.getElementById('auth-modal').classList.remove('shake-animation'), 500);
+            }
+        }
+
+        // === Start Game ===
+        function startGame() {
+            if (!currentAddress) {
+                showStatus('Please connect a wallet first.', 'text-red-600');
+                return;
+            }
+
+            document.getElementById('success-title').textContent = 'LAUNCHING GAME...';
+            document.getElementById('success-message-text').textContent = 'Preparing your gaming adventure...';
+            document.getElementById('start-game-button').disabled = true;
+            document.getElementById('start-game-button').textContent = 'LOADING...';
+
+            // Redirect to game with wallet address
+            setTimeout(() => {
+                window.location.href = `game.html?address=${encodeURIComponent(currentAddress)}`;
+            }, 2000);
+        }
+
+        // === Initialize ===
+        document.addEventListener('DOMContentLoaded', () => {
+            // Event listeners
+            document.getElementById('connect-wallet-btn').addEventListener('click', connectSuiWallet);
+            document.getElementById('install-wallet-btn').addEventListener('click', () => {
+                window.open('https://chrome.google.com/webstore/detail/sui-wallet/opcgpfbfpaagpikpbkmfgcjgchhlmfeh', '_blank');
+            });
+            document.getElementById('demo-mode-btn').addEventListener('click', enableDemoMode);
+            document.getElementById('use-address-btn').addEventListener('click', useManualAddress);
+            document.getElementById('start-game-button').addEventListener('click', startGame);
+
+            // Check if wallet is available
+            if (window.sui) {
+                showStatus('Sui wallet detected! Click to connect.', 'text-green-600');
+            }
+        });
+    </script>
+</body>
+</html>

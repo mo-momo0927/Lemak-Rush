@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Wallet Login</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load the pixel/retro font 'Press Start 2P' -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Define custom retro font class */
+        .retro-font {
+            font-family: 'Press Start 2P', cursive;
+            text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5); 
+        }
+
+        /* --- New Retro Frame Style (Soft and Rounded) --- */
+        .retro-frame {
+            background-color: #F3F4F6; /* Light gray base */
+            border: 6px solid #4B5563; /* Dark gray border */
+            border-radius: 1.5rem; /* Large rounded corners */
+            padding: 2.5rem;
+            /* Creates a thick, smooth 3D casing effect */
+            box-shadow: 0 10px 0 #1F2937, 0 15px 0 #111827; 
+        }
+
+        /* Input Field Style: Add padding to the right for the eye icon */
+        .input-style {
+            border: 3px solid #1F2937;
+            background: #E5E7EB; /* Off-white input area */
+            border-radius: 0.5rem;
+            padding: 0.75rem 3rem 0.75rem 0.75rem; /* Added right padding (3rem) */
+            font-size: 0.75rem;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.1s;
+        }
+
+        .input-style:focus {
+            outline: 2px solid #FBBF24; /* Amber focus outline */
+            outline-offset: -3px;
+        }
+
+        /* Eye icon button positioning */
+        .password-toggle-button {
+            top: 50%;
+            transform: translateY(-50%);
+            right: 0.5rem;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* --- Custom Button Style (Based on the Image) --- */
+        .cartoon-button {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #FBBF24; /* Amber 400 - Main Yellow */
+            border: 4px solid #92400E; /* Dark Brown border */
+            border-radius: 9999px; /* Full rounded corners */
+            color: #92400E; /* Dark Brown Text */
+            text-shadow: 1px 1px 0 #fff; /* White text shadow for text contrast */
+            padding: 0.75rem 1.5rem;
+            line-height: 1;
+            transition: all 0.1s ease;
+            font-size: 0.8rem;
+            
+            /* 3D and Gloss Effect */
+            box-shadow: 0 6px 0 0 #92400E, /* Bottom Shadow for depth */
+                        inset 0 4px 6px -1px rgba(255, 255, 255, 0.6), /* Top-Left Highlight/Gloss */
+                        inset 0 -4px 6px -1px rgba(0, 0, 0, 0.2); /* Bottom-Right Inner Shadow */
+        }
+        
+        /* Make the "Start Game" button green for success */
+        #start-game-button {
+            background-color: #10B981; /* Emerald 500 - Green */
+            border-color: #065F46; /* Emerald 800 - Darker Green */
+            color: #065F46; /* Darker Green Text */
+            box-shadow: 0 6px 0 0 #065F46, 
+                        inset 0 4px 6px -1px rgba(255, 255, 255, 0.6),
+                        inset 0 -4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+
+        .cartoon-button:active {
+            /* Press effect: move down and hide the bottom shadow */
+            transform: translateY(6px);
+            box-shadow: 0 0px 0 0 #92400E, 
+                        inset 0 4px 6px -1px rgba(255, 255, 255, 0.6),
+                        inset 0 -4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Custom shake animation for error/loading */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        .shake-animation {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 640px) {
+            .retro-frame {
+                border-radius: 1rem;
+                padding: 1.5rem;
+            }
+            .retro-font {
+                font-size: 0.75rem;
+            }
+            .cartoon-button {
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body class="relative min-h-screen flex items-center justify-center p-4"
+      style="
+        background-image: url('back2.png');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-attachment: fixed;
+      ">
+       <!-- Login/Signup Window -->
+    <div id="auth-modal" 
+         class="retro-frame w-full max-w-sm mx-auto flex flex-col space-y-6">
+        
+        <!-- Header -->
+        <h1 id="header-title" class="retro-font text-2xl text-gray-900 text-center uppercase tracking-wider mb-2">
+            LOGIN
+        </h1>
+
+        <!-- Form/Inputs -->
+        <div id="login-fields" class="space-y-4">
+            <!-- Username Field -->
+            <label for="user-input" class="retro-font text-xs text-gray-700 block">Username</label>
+            <input type="text" id="user-input" placeholder="ENTER YOUR ID" 
+                   class="input-style retro-font w-full text-gray-800 placeholder-gray-500" 
+                   value="">
+
+            <!-- Password Field -->
+            <label for="password-input-container" class="retro-font text-xs text-gray-700 block">Password</label>
+            <div id="password-input-container" class="relative">
+                <input type="password" id="password-input" placeholder="********" 
+                       class="input-style retro-font w-full text-gray-800 placeholder-gray-500" 
+                       value="">
+                <!-- Toggle Button for Password -->
+                <button type="button" 
+                        class="absolute password-toggle-button text-gray-600 hover:text-gray-800 transition-colors"
+                        onclick="togglePasswordVisibility('password-input', this)">
+                    <!-- Eye Icon (Visible by default) -->
+                    <svg class="eye-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    <!-- Slashed Eye Icon (Hidden by default) -->
+                    <svg class="slash-icon w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7 1.274-4.057 5.065-7 9.542-7a9.97 9.97 0 011.875.175"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-9-9"></path>
+                    </svg>
+                </button>
+            </div>
+
+
+            <!-- Confirm Password Field (Initially hidden for Login view) -->
+            <div id="confirm-password-container" class="space-y-1 hidden">
+                <label for="confirm-password-input-container" class="retro-font text-xs text-gray-700 block">Confirm Password</label>
+                <div id="confirm-password-input-container" class="relative">
+                    <input type="password" id="confirm-password-input" placeholder="********" 
+                           class="input-style retro-font w-full text-gray-800 placeholder-gray-500" 
+                           value="">
+                    <!-- Toggle Button for Confirm Password -->
+                    <button type="button" 
+                            class="absolute password-toggle-button text-gray-600 hover:text-gray-800 transition-colors"
+                            onclick="togglePasswordVisibility('confirm-password-input', this)">
+                        <!-- Eye Icon (Visible by default) -->
+                        <svg class="eye-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        <!-- Slashed Eye Icon (Hidden by default) -->
+                        <svg class="slash-icon w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7 1.274-4.057 5.065-7 9.542-7a9.97 9.97 0 011.875.175"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-9-9"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUCCESS SCREEN (New View State) -->
+        <div id="success-screen" class="hidden text-center space-y-4 pt-4 pb-4">
+            <h2 id="success-title" class="retro-font text-xl text-green-700 uppercase">ACCESS GRANTED!</h2>
+            <p id="success-message-text" class="retro-font text-xs text-gray-800">
+                You are securely connected to OneWallet. Time to play!
+            </p>
+            <button id="start-game-button" class="cartoon-button uppercase w-full h-14 mt-4">
+                Start Game
+            </button>
+        </div>
+
+        <!-- Status Message Box -->
+        <div id="status-message" 
+             class="retro-font text-xs text-center text-gray-600 p-2 min-h-[20px]">
+            Ready to connect to OneWallet.
+        </div>
+        
+        <!-- Main Button and Forgot Password (Grouped for easy hiding) -->
+        <div id="auth-controls" class="relative pt-2 pb-6"> 
+            <button id="main-button" 
+                    class="cartoon-button w-full h-14 uppercase">
+                LOGIN
+            </button>
+            
+            <!-- Forgot Password (Now positioned 75px down for clear separation) -->
+            <button id="forgot-password" 
+                    class="absolute top-[75px] right-0 retro-font text-[0.55rem] text-red-600 hover:text-red-800 transition-colors">
+                Forgot Password?
+            </button>
+        </div>
+
+        <!-- Footer / Toggle View -->
+        <div id="footer-text" class="mt-8 text-center pt-2">
+            <span class="retro-font text-[0.65rem] text-gray-600">
+                Need an account? 
+                <button id="toggle-view" class="retro-font text-[0.65rem] text-indigo-600 hover:text-indigo-800 underline">
+                    SIGN UP
+                </button>
+            </span>
+        </div>
+
+    </div>
+
+    <script>
+        // === Global Element References ===
+        const modal = document.getElementById('auth-modal');
+        const headerTitle = document.getElementById('header-title');
+        const userInput = document.getElementById('user-input');
+        const passwordInput = document.getElementById('password-input');
+        const confirmPasswordContainer = document.getElementById('confirm-password-container');
+        const confirmPasswordInput = document.getElementById('confirm-password-input');
+        const mainButton = document.getElementById('main-button');
+        const authControls = document.getElementById('auth-controls');
+        const footerTextContainer = document.getElementById('footer-text');
+        const statusMessage = document.getElementById('status-message');
+        const forgotPasswordButton = document.getElementById('forgot-password');
+        const successScreen = document.getElementById('success-screen');
+        const successTitle = document.getElementById('success-title');
+        const successMessageText = document.getElementById('success-message-text');
+        const startGameButton = document.getElementById('start-game-button');
+        
+        let toggleViewButton; 
+        let isLoginView = true;
+        const MIN_PASSWORD_LENGTH = 8; // Added password length constant
+
+        // Utility to update status message colors and text
+        function showStatus(message, colorClass = 'text-gray-600') {
+            statusMessage.classList.remove('text-red-600', 'text-green-600', 'text-yellow-600', 'text-gray-600');
+            statusMessage.classList.add(colorClass);
+            statusMessage.textContent = message;
+        }
+        
+        /**
+         * Toggles the visibility of a password input field and updates the icon.
+         */
+        function togglePasswordVisibility(inputId, buttonElement) {
+            const input = document.getElementById(inputId);
+            const isPassword = input.type === 'password';
+
+            input.type = isPassword ? 'text' : 'password';
+
+            // Toggle the icons inside the button
+            const eyeIcon = buttonElement.querySelector('.eye-icon');
+            const slashIcon = buttonElement.querySelector('.slash-icon');
+
+            if (isPassword) {
+                eyeIcon.classList.add('hidden');
+                slashIcon.classList.remove('hidden');
+            } else {
+                eyeIcon.classList.remove('hidden');
+                slashIcon.classList.add('hidden');
+            }
+        }
+
+        // --- Shows the success message and Start Game button ---
+        function showSuccessScreen(actionType) {
+            // Hide all auth elements
+            document.getElementById('login-fields').classList.add('hidden');
+            authControls.classList.add('hidden');
+            footerTextContainer.classList.add('hidden');
+            forgotPasswordButton.style.display = 'none';
+            statusMessage.classList.add('hidden');
+            
+            // Show success screen
+            successScreen.classList.remove('hidden');
+
+            if (actionType === 'LOGIN') {
+                successTitle.textContent = 'ACCESS GRANTED!';
+                successMessageText.textContent = 'Welcome back! Your OneWallet connection is secure. You may now proceed to the game.';
+            } else { // SIGN UP
+                successTitle.textContent = 'REGISTRATION COMPLETE!';
+                successMessageText.textContent = 'Your new account is ready. Get ready to play!';
+            }
+        }
+
+        // --- IMPROVEMENT: Replaced alert() with a full screen takeover ---
+        function startGame() {
+            successTitle.textContent = 'LAUNCHING...';
+            successMessageText.textContent = 'Prepare for adventure!';
+            startGameButton.disabled = true;
+            startGameButton.textContent = 'LOADING...';
+
+            console.log('--- GAME STARTED ---');
+
+            // Redirect to game.html after a short delay
+            setTimeout(() => {
+                window.location.href = 'game.html';
+            }, 1500);
+        }
+
+        // Simulates the OneWallet connection attempt (for Login or Sign Up)
+        async function attemptConnection() {
+            // Check for basic input filling
+            if (!userInput.value || !passwordInput.value) {
+                showStatus('ERROR: Username and Password required.', 'text-red-600');
+                modal.classList.add('shake-animation');
+                setTimeout(() => modal.classList.remove('shake-animation'), 500);
+                return;
+            }
+
+            mainButton.disabled = true;
+            mainButton.textContent = isLoginView ? 'CONNECTING...' : 'REGISTERING...';
+            showStatus(isLoginView ? 'Establishing secure P2P link (2s)...' : 'Creating OneWallet account (2s)...', 'text-yellow-600');
+            modal.classList.remove('shake-animation'); // Clear any previous shake
+
+            // --- SIGN UP LOGIC ---
+            if (!isLoginView) {
+                // IMPROVEMENT: Added minimum password length check
+                if (passwordInput.value.length < MIN_PASSWORD_LENGTH) {
+                    showStatus(`ERROR: Password must be at least ${MIN_PASSWORD_LENGTH} characters long.`, 'text-red-600');
+                    modal.classList.add('shake-animation');
+                    mainButton.textContent = 'RETRY SIGN UP';
+                    mainButton.disabled = false;
+                    setTimeout(() => modal.classList.remove('shake-animation'), 500);
+                    return;
+                }
+
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    showStatus('ERROR: Passwords do not match. Try again.', 'text-red-600');
+                    modal.classList.add('shake-animation');
+                    passwordInput.value = '';
+                    confirmPasswordInput.value = '';
+                    mainButton.textContent = 'RETRY SIGN UP';
+                    mainButton.disabled = false;
+                    setTimeout(() => modal.classList.remove('shake-animation'), 500);
+                    return;
+                }
+                
+                // Simulate registration
+                try {
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    showSuccessScreen('SIGN UP'); 
+                } catch (error) {
+                    showStatus('ERROR (500): Registration failed. Try later.', 'text-red-600');
+                    mainButton.textContent = 'RETRY SIGN UP';
+                    mainButton.disabled = false;
+                }
+
+            // --- LOGIN LOGIC ---
+            } else {
+                // Simulate connection
+                try {
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    showSuccessScreen('LOGIN');
+                } catch (error) {
+                    // Handle simulated API errors
+                    showStatus('ERROR (401): Connection failed. Check username/password.', 'text-red-600');
+                    modal.classList.add('shake-animation'); 
+                    mainButton.textContent = 'RETRY LOGIN';
+                    mainButton.disabled = false;
+                }
+            }
+        }
+        
+        // Toggles the view between Login and Sign Up
+        function toggleAuthView() {
+            isLoginView = !isLoginView;
+            
+            // Ensure all auth elements are visible and success screen is hidden when toggling views
+            successScreen.classList.add('hidden');
+            document.getElementById('login-fields').classList.remove('hidden');
+            authControls.classList.remove('hidden');
+            footerTextContainer.classList.remove('hidden');
+            statusMessage.classList.remove('hidden');
+
+            // Resetting button state
+            mainButton.disabled = false;
+            mainButton.classList.remove('bg-green-500');
+            mainButton.classList.add('bg-amber-400');
+            
+            // Clear inputs when switching views
+            userInput.value = '';
+            passwordInput.value = '';
+            confirmPasswordInput.value = '';
+            
+            // Reset icon states (re-hides visible passwords)
+            document.querySelectorAll('.slash-icon').forEach(icon => icon.classList.add('hidden'));
+            document.querySelectorAll('.eye-icon').forEach(icon => icon.classList.remove('hidden'));
+            document.querySelectorAll('input[type="text"]').forEach(input => {
+                if(input.id.includes('password')) input.type = 'password';
+            });
+            
+            if (isLoginView) {
+                // Switch to LOGIN View
+                headerTitle.textContent = 'LOGIN';
+                mainButton.textContent = 'LOGIN';
+                confirmPasswordContainer.classList.add('hidden');
+                footerTextContainer.innerHTML = '<span class="retro-font text-[0.65rem] text-gray-600">Need an account? <button id="toggle-view" class="retro-font text-[0.65rem] text-indigo-600 hover:text-indigo-800 underline">SIGN UP</button></span>';
+                forgotPasswordButton.style.display = 'block';
+                showStatus('Ready to connect to OneWallet.');
+
+            } else {
+                // Switch to SIGN UP View
+                headerTitle.textContent = 'SIGN UP';
+                mainButton.textContent = 'REGISTER';
+                confirmPasswordContainer.classList.remove('hidden');
+                footerTextContainer.innerHTML = '<span class="retro-font text-[0.65rem] text-gray-600">Already have an account? <button id="toggle-view" class="retro-font text-[0.65rem] text-indigo-600 hover:text-indigo-800 underline">LOGIN</button></span>';
+                forgotPasswordButton.style.display = 'none';
+                showStatus('New user registration mode active.');
+            }
+            
+            // Re-attach the listener to the dynamically created toggle button
+            document.getElementById('toggle-view').addEventListener('click', toggleAuthView);
+        }
+
+        // Initial setup and event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get the initial toggle view button
+            toggleViewButton = document.getElementById('toggle-view');
+
+            // Initial listener for the main button (Login/Register)
+            mainButton.addEventListener('click', attemptConnection);
+            
+            // Initial listener for the view toggle
+            toggleViewButton.addEventListener('click', toggleAuthView);
+            
+            // Listener for the Start Game button
+            startGameButton.addEventListener('click', startGame);
+
+            // Placeholder for Forgot Password action
+            forgotPasswordButton.addEventListener('click', () => {
+                showStatus('Password reset link sent to registered email.', 'text-yellow-600');
+            });
+        });
+    </script>
+  
+</body>

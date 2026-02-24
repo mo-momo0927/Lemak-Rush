@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lemak Rush - Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Press Start 2P', cursive;
+            background-image: url('Background.png');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .game-container {
+            display: grid;
+            grid-template-rows: 100px 1fr 150px;
+            height: 100vh;
+        }
+
+        .top-bar {
+            background: rgba(146, 64, 14, 0.9);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            border-bottom: 4px solid #FBBF24;
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 300px 1fr;
+            position: relative;
+            padding: 20px;
+        }
+
+        .customer-area {
+            position: relative;
+            min-height: 400px;
+        }
+
+        .customer {
+            position: absolute;
+            bottom: 89px;
+            width: 400px;
+            height: 400px;
+            transition: all 0.8s ease;
+            cursor: default;
+        }
+
+            .customer img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                pointer-events: none;
+            }
+
+        .customer-queue {
+            position: absolute;
+            bottom: 89px;
+            right: 600px;
+        }
+
+        .queued-customer {
+            width: 400px;
+            height: 400px;
+            opacity: 1;
+            transition: all 0.8s ease;
+            position: absolute;
+            bottom: 0;
+        }
+
+            .queued-customer img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                pointer-events: none;
+            }
+
+
+        .cooking-station {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0px;
+            margin-top: 30px;
+            z-index: 1;
+        }
+
+        .pan {
+            width: 350px;
+            height: 350px;
+            background-image: url('Pan.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            position: absolute;
+            bottom: -235px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        .plate-stack {
+            position: absolute;
+            bottom: -250px;
+            right: -35px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            z-index: 10;
+        }
+
+        .plate-in-stack {
+            width: 300px;
+            height: 300px;
+            position: relative;
+        }
+
+        .plate-ingredient {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+            transition: transform 0.2s;
+            pointer-events: auto;
+        }
+
+            .plate-ingredient:active {
+                cursor: grabbing;
+                transform: scale(1.1);
+            }
+
+        .plate-in-stack:nth-child(1) {
+            transform: translateY(400px);
+            z-index: 103;
+        }
+
+        .plate-in-stack:nth-child(2) {
+            transform: translateY(140px);
+            z-index: 102;
+        }
+
+        .plate-in-stack:nth-child(3) {
+            transform: translateY(-120px);
+            z-index: 101;
+        }
+
+        .plate-on-table {
+            position: absolute;
+            bottom: -130px;
+            left: 75%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 300px;
+            background-image: url('Plate.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 10;
+        }
+
+        .ingredients {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0px;
+            padding: 0px;
+            margin-top: 0px;
+        }
+
+        .ingredient {
+            width: 80px;
+            height: 80px;
+            cursor: grab;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .ingredient img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+
+            .ingredient:active {
+                cursor: grabbing;
+                transform: scale(1.1);
+            }
+
+        .rice-bucket-container {
+            position: absolute;
+            bottom: -170px;
+            left: 1250px;
+            z-index: 100; /*___________this change the layer of rice bucket to prevent it from blocking by the plates_____settled dont change*/
+        }
+
+            .rice-bucket-container .tray {
+                width: 250px !important;
+                height: 250px !important;
+                background-size: contain !important;
+                background-repeat: no-repeat !important;
+                background-position: center !important;
+                position: relative !important;
+                cursor: grab !important;
+            }
+
+                .rice-bucket-container .tray:active {
+                    cursor: grabbing !important;
+                }
+
+        .right-ingredients {
+            position: absolute;
+            bottom: -150px;
+            right: 227px;
+            display: flex;
+            gap: 0px;
+            align-items: flex-end;
+            z-index: 10;
+        }
+
+            .right-ingredients * {
+                box-sizing: border-box;
+            }
+
+            .right-ingredients .small-tray {
+                width: 100px !important;
+                height: 120px !important;
+                flex-shrink: 0;
+                margin: 0 !important;
+                padding: 0 !important;
+                display: block;
+            }
+
+            .right-ingredients .cucumber-tray {
+                width: 130px !important;
+                height: 130px !important;
+                background-size: contain !important;
+                transform: translateX(0px) translateY(-1px);
+            }
+
+            .right-ingredients .sambal-tray {
+                width: 127px !important;
+                height: 127px !important;
+                background-size: contain !important;
+                transform: translateX(0px) translateY(0px);
+            }
+
+            .right-ingredients .peanut-tray {
+                width: 117px !important;
+                height: 117px !important;
+                background-size: contain !important;
+                transform: translateX(5px) translateY(6px);
+            }
+
+            .right-ingredients .anchovies-tray {
+                width: 125px !important;
+                height: 125px !important;
+                background-size: contain !important;
+                transform: translateX(0px) translateY(0px);
+            }
+
+        .left-ingredients {
+            position: absolute;
+            bottom: -20px;
+            left: 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .chicken-tray .tray {
+            width: 450px !important;
+            height: 450px !important;
+            background-size: contain !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+            position: relative !important;
+        }
+
+        .egg-tray .tray {
+            width: 270px !important;
+            height: 270px !important;
+            background-size: contain !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+            position: relative !important;
+        }
+
+        .chicken-tray {
+            position: relative;
+            left: -80px !important;
+            bottom: -520px !important;
+        }
+
+        .egg-tray {
+            position: relative;
+            right: -320px !important;
+            top: 140px !important;
+        }
+
+        .menu-button {
+            background-color: #FBBF24;
+            border: 4px solid #92400E;
+            border-radius: 9999px;
+            color: #92400E;
+            padding: 0.8rem 1.5rem;
+            font-size: 0.7rem;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .dragging {
+            opacity: 0.7;
+            transform: scale(1.1);
+        }
+
+        .drop-zone {
+            border: 2px dashed transparent;
+            transition: border 0.3s;
+        }
+
+            .drop-zone.active {
+                border: 2px dashed #FBBF24;
+            }
+
+        .cooked-item {
+            position: absolute;
+            width: 110px;
+            height: 110px;
+            transition: all 0.5s ease;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: auto;
+            cursor: grab;
+            z-index: 100;
+        }
+
+            .cooked-item:active {
+                cursor: grabbing;
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+
+            .cooked-item img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+
+            .cooked-item[draggable="true"] {
+                cursor: grab !important;
+            }
+
+                .cooked-item[draggable="true"]:active {
+                    cursor: grabbing !important;
+                }
+
+        .pan .cooked-item[draggable="true"] {
+            cursor: grab !important;
+            z-index: 100 !important;
+        }
+
+            .pan .cooked-item[draggable="true"]:active {
+                cursor: grabbing !important;
+            }
+
+        .plate-on-table .cooked-item[data-type="Rice"] {
+            width: 90px !important;
+            height: 90px !important;
+        }
+
+        .plate-on-table .cooked-item[data-type="Cucumber"] {
+            width: 90px !important;
+            height: 90px !important;
+        }
+
+        .plate-on-table .cooked-item[data-type="Sambal"] {
+            width: 90px !important;
+            height: 90px !important;
+        }
+
+        .plate-on-table .cooked-item[data-type="Peanuts"] {
+            width: 60px !important;
+            height: 60px !important;
+        }
+
+        .plate-on-table .cooked-item[data-type="Anchovies"] {
+            width: 90px !important;
+            height: 90px !important;
+        }
+
+        .plate-on-table .cooked-item[data-type="FriedEgg"] {
+            width: 90px !important;
+            height: 90px !important;
+        }
+
+        .plate-on-table .cooked-item[data-type="FriedChicken"] {
+            width: 95px !important;
+            height: 95px !important;
+        }
+
+        .cooked-item[data-type="chicken"] {
+            width: 120px;
+            height: 120px;
+        }
+
+        .cooked-item[data-type="egg"] {
+            width: 100px;
+            height: 100px;
+        }
+
+        .dialog-box {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-image: url('Dialog.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            border: none;
+            padding: 2rem;
+            text-align: center;
+            width: 500px;
+            max-width: 350px;
+            height: 250px;
+            z-index: 100;
+            color: #92400E;
+            font-size: 0.8rem;
+            background-color: transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .requirements {
+            display: flex;
+            gap: -10px;
+            justify-content: center;
+            margin-top: -10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .requirement-item {
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .requirement-item img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+
+        .plus-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+            .plus-icon img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+
+        .trays-container {
+            display: flex;
+            gap: 0px;
+            justify-content: center;
+            margin-bottom: 00px;
+        }
+
+        .cooking-timer {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.4rem;
+        }
+
+        .tray[draggable="true"] {
+            cursor: grab;
+        }
+
+            .tray[draggable="true"]:active {
+                cursor: grabbing;
+            }
+
+        .trash-can {
+            position: absolute;
+            bottom: 150px;
+            right: 10px;
+            width: 150px;
+            height: 150px;
+            cursor: pointer;
+            z-index: 5;
+        }
+
+            .trash-can img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+
+            .trash-can.active {
+                border: 2px dashed yellow;
+                border-radius: 10px;
+            }
+
+        #serveButton {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #FBBF24;
+            border: 4px solid #92400E;
+            border-radius: 9999px;
+            color: #92400E;
+            padding: 0.8rem 1.5rem;
+            font-size: 0.7rem;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            z-index: 1000; /* HIGHER z-index to be on top */
+            pointer-events: auto; /* Ensure it can receive clicks */
+        }
+
+        .served-customer {
+            position: absolute;
+            bottom: 100px;
+            right: 50px;
+            width: 400px;
+            height: 400px;
+            opacity: 0.5;
+        }
+
+            .served-customer img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="top-bar">
+            <div>Score: <span id="score">0</span></div>
+            <div>Time: <span id="timer">180</span>s</div>
+            <div>Customers: <span id="customersServed">0</span></div>
+
+        </div>
+
+        <div class="game-area">
+            <div class="customer-area" id="customerArea">
+                <div class="customer-queue" id="customerQueue"></div>
+                <div class="customer" id="currentCustomer"></div>
+            </div>
+
+            <div class="cooking-station" ondrop="dropOnTable(event)" ondragover="allowDrop(event)">
+                <div class="dialog-box" id="dialogBox" style="display: none;">
+                    <div>I want:</div>
+                    <div class="requirements" id="requirements"></div>
+                </div>
+
+                <div class="left-ingredients">
+                    <div class="big-tray chicken-tray">
+                        <div class="tray" style="background-image: url('RawChickenTray.png');" draggable="true" ondragstart="dragContainer(event)" data-type="chicken" data-cookable="true"></div>
+                    </div>
+                    <div class="big-tray egg-tray">
+                        <div class="tray" style="background-image: url('EggBox.png');" draggable="true" ondragstart="dragContainer(event)" data-type="egg" data-cookable="true"></div>
+                    </div>
+                </div>
+
+                <div class="rice-bucket-container">
+                    <div class="tray" style="background-image: url('RiceBucket.png');" draggable="true" ondragstart="dragContainer(event)" data-type="rice" data-cookable="false"></div>
+                </div>
+
+                <div class="right-ingredients">
+                    <div class="small-tray right-tray">
+                        <div class="tray right-tray-item cucumber-tray" style="background-image: url('CucumberBox.png');" draggable="true" ondragstart="dragContainer(event)" data-type="cucumber" data-cookable="false"></div>
+                    </div>
+                    <div class="small-tray right-tray">
+                        <div class="tray right-tray-item sambal-tray" style="background-image: url('SambalBox.png');" draggable="true" ondragstart="dragContainer(event)" data-type="sambal" data-cookable="false"></div>
+                    </div>
+                    <div class="small-tray right-tray">
+                        <div class="tray right-tray-item peanut-tray" style="background-image: url('PeanutBox.png');" draggable="true" ondragstart="dragContainer(event)" data-type="peanuts" data-cookable="false"></div>
+                    </div>
+                    <div class="small-tray right-tray">
+                        <div class="tray right-tray-item anchovies-tray" style="background-image: url('AnchoviesBox.png');" draggable="true" ondragstart="dragContainer(event)" data-type="anchovies" data-cookable="false"></div>
+                    </div>
+                </div>
+
+                <div class="plate-stack">
+                    <div class="plate-in-stack" data-plate="1">
+                        <img src="Plate.png" class="plate-ingredient" onclick="placePlateOnTable()">
+                    </div>
+                    <div class="plate-in-stack" data-plate="2">
+                        <img src="Plate.png" class="plate-ingredient" onclick="placePlateOnTable()">
+                    </div>
+                    <div class="plate-in-stack" data-plate="3">
+                        <img src="Plate.png" class="plate-ingredient" onclick="placePlateOnTable()">
+                    </div>
+                </div>
+
+                <div class="pan drop-zone" id="pan" ondrop="dropIngredient(event)" ondragover="allowDrop(event)"></div>
+                <button id="serveButton" onclick="serveFood()">Serve Food</button>
+            </div>
+
+            <div class="customer-area"></div>
+
+            <div class="trash-can" id="trashCan" ondrop="dropOnTrash(event)" ondragover="allowDrop(event)">
+                <img src="TrashCan.png" alt="Trash Can">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        let timeLeft = 180;
+        let customersServed = 0;
+        let currentOrder = [];
+        let panIngredients = [];
+        let plateIngredients = [];
+        let cookingTimers = {};
+        let customerQueue = [];
+        let currentCustomer = null;
+        let plateOnTable = null;
+        let customerSpawnTimer = null;
+
+        const customerTypes = ['Customer1.png', 'Customer2.png', 'Customer3.png'];
+
+        const possibleOrders = [
+            ['Rice', 'FriedEgg', 'Cucumber', 'Sambal'],
+            ['Rice', 'FriedChicken', 'Cucumber', 'Sambal'],
+            ['Rice', 'FriedEgg', 'Peanuts', 'Anchovies'],
+            ['Rice', 'FriedChicken', 'Peanuts'],
+            ['Rice', 'FriedEgg', 'Sambal'],
+            ['Rice', 'FriedChicken', 'Sambal', 'Anchovies']
+        ];
+
+        function initGame() {
+            startTimer();
+            startCustomerSpawning();
+            spawnInitialCustomers();
+            serveNextCustomer();
+        }
+
+        function startTimer() {
+            const timerElement = document.getElementById('timer');
+            const gameInterval = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(gameInterval);
+                    clearInterval(customerSpawnTimer);
+
+                    // Redirect to game over page with score
+                    window.location.href = `gameover.html?score=${score}`;
+                }
+            }, 1000);
+        }
+
+        function startCustomerSpawning() {
+            customerSpawnTimer = setInterval(() => {
+                if (customerQueue.length < 1) {
+                    spawnCustomer();
+                }
+            }, 15000);
+        }
+
+        function spawnInitialCustomers() {
+            spawnCustomer();
+        }
+
+        function spawnCustomer() {
+            const customer = {
+                id: Date.now(),
+                type: customerTypes[Math.floor(Math.random() * customerTypes.length)],
+                order: [...possibleOrders[Math.floor(Math.random() * possibleOrders.length)]]
+            };
+            customerQueue.push(customer);
+            updateCustomerQueue();
+
+            // Debug log to verify different orders
+            console.log('Spawned customer with order:', customer.order);
+        }
+
+        function showOrderDialog() {
+            const dialogBox = document.getElementById('dialogBox');
+            const requirements = document.getElementById('requirements');
+
+            // Debug log
+            console.log('Showing order for customer:', currentCustomer.order);
+
+            requirements.innerHTML = '';
+            currentCustomer.order.forEach((ingredient, index) => {
+                const reqItem = document.createElement('div');
+                reqItem.className = 'requirement-item';
+                reqItem.innerHTML = `<img src="${ingredient}.png" alt="${ingredient}">`;
+                requirements.appendChild(reqItem);
+
+                if (index < currentCustomer.order.length - 1) {
+                    const plusItem = document.createElement('div');
+                    plusItem.className = 'plus-icon';
+                    plusItem.innerHTML = `<img src="PlusIcon.png" alt="+">`;
+                    requirements.appendChild(plusItem);
+                }
+            });
+
+            dialogBox.style.display = 'block';
+        }
+
+        function updateCustomerQueue() {
+            const queueElement = document.getElementById('customerQueue');
+            queueElement.innerHTML = '';
+
+            if (customerQueue.length > 0) {
+                const queuedCustomer = document.createElement('div');
+                queuedCustomer.className = 'queued-customer';
+                queuedCustomer.style.left = '-400px';
+                queuedCustomer.style.opacity = '1';
+                queuedCustomer.style.transition = 'all 0.8s ease';
+                queuedCustomer.innerHTML = `<img src="${customerQueue[0].type}" alt="Customer">`;
+                queueElement.appendChild(queuedCustomer);
+
+                setTimeout(() => {
+                    queuedCustomer.style.left = '300px';
+                }, 50);
+            }
+        }
+
+        function serveNextCustomer() {
+            if (customerQueue.length > 0) {
+                currentCustomer = customerQueue.shift();
+                updateCustomerQueue();
+                showCurrentCustomer();
+                showOrderDialog();
+
+                if (customerQueue.length === 0) {
+                    spawnCustomer();
+                }
+            } else {
+                // If no customers in queue, spawn a new one immediately
+                spawnCustomer();
+                setTimeout(() => {
+                    currentCustomer = customerQueue.shift();
+                    updateCustomerQueue();
+                    showCurrentCustomer();
+                    showOrderDialog();
+                }, 1000);
+            }
+        }
+
+        function showCurrentCustomer() {
+            const customerElement = document.getElementById('currentCustomer');
+            customerElement.innerHTML = `<img src="${currentCustomer.type}" alt="Current Customer">`;
+            customerElement.style.left = '-400px';
+            customerElement.style.opacity = '1';
+
+            setTimeout(() => {
+                customerElement.style.left = '20px';
+            }, 50);
+        }
+
+        function showOrderDialog() {
+            const dialogBox = document.getElementById('dialogBox');
+            const requirements = document.getElementById('requirements');
+
+            requirements.innerHTML = '';
+            currentCustomer.order.forEach((ingredient, index) => {
+                const reqItem = document.createElement('div');
+                reqItem.className = 'requirement-item';
+                reqItem.innerHTML = `<img src="${ingredient}.png" alt="${ingredient}">`;
+                requirements.appendChild(reqItem);
+
+                if (index < currentCustomer.order.length - 1) {
+                    const plusItem = document.createElement('div');
+                    plusItem.className = 'plus-icon';
+                    plusItem.innerHTML = `<img src="PlusIcon.png" alt="+">`;
+                    requirements.appendChild(plusItem);
+                }
+            });
+
+            dialogBox.style.display = 'block';
+        }
+
+        function placePlateOnTable() {
+            if (!plateOnTable) {
+                createPlateOnTable();
+            }
+        }
+
+        function createPlateOnTable() {
+            const tableArea = document.querySelector('.cooking-station');
+            const plate = document.createElement('div');
+            plate.className = 'plate-on-table drop-zone';
+            plate.id = 'tablePlate';
+            plate.style.left = '70%';
+            plate.style.bottom = '-120px';
+            plate.ondrop = dropOnTablePlate;
+            plate.ondragover = allowDrop;
+            tableArea.appendChild(plate);
+            plateOnTable = plate;
+
+        }
+
+        function dropOnTablePlate(ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            ev.currentTarget.classList.remove('active');
+
+            const ingredientType = ev.dataTransfer.getData("text/plain");
+
+            const allowedTypes = [
+                'egg_cooked', 'chicken_cooked',
+                'rice', 'cucumber', 'sambal', 'peanuts', 'anchovies'
+            ];
+
+            if (allowedTypes.includes(ingredientType)) {
+                const existingIngredients = Array.from(plateOnTable.querySelectorAll('.cooked-item'));
+                const ingredientAlreadyExists = existingIngredients.some(item => {
+                    const itemType = item.dataset.type.toLowerCase();
+                    const newType = ingredientType.replace('_cooked', '');
+                    return itemType === newType;
+                });
+
+                if (!ingredientAlreadyExists) {
+                    addToTablePlate(ingredientType, ev.currentTarget);
+                }
+            }
+
+            const draggingElement = document.querySelector('.dragging');
+            if (draggingElement) {
+                draggingElement.classList.remove('dragging');
+            }
+        }
+
+        function addToTablePlate(ingredientType, plate) {
+            const plateItem = document.createElement('img');
+
+            if (ingredientType === 'egg_cooked') {
+                plateItem.src = 'FriedEgg.png';
+                plateItem.dataset.type = 'FriedEgg';
+            } else if (ingredientType === 'chicken_cooked') {
+                plateItem.src = 'FriedChicken.png';
+                plateItem.dataset.type = 'FriedChicken';
+            } else if (ingredientType === 'rice') {
+                plateItem.src = 'Rice.png';
+                plateItem.dataset.type = 'Rice';
+            } else {
+                plateItem.src = ingredientType.charAt(0).toUpperCase() + ingredientType.slice(1) + '.png';
+                plateItem.dataset.type = ingredientType.charAt(0).toUpperCase() + ingredientType.slice(1);
+            }
+
+            plateItem.className = 'cooked-item';
+            plateItem.draggable = true;
+            plateItem.style.cursor = 'grab';
+
+            const position = getIngredientPosition(ingredientType, plate);
+            plateItem.style.left = position.left;
+            plateItem.style.top = position.top;
+            plateItem.style.zIndex = position.zIndex || 10;
+
+            plateItem.ondragstart = function (e) {
+                e.dataTransfer.setData("text/plain", ingredientType);
+                plateItem.classList.add('dragging');
+
+                const ghostImg = new Image();
+                ghostImg.src = plateItem.src;
+                ghostImg.onload = function () {
+                    e.dataTransfer.setDragImage(ghostImg, ghostImg.width / 2, ghostImg.height / 2);
+                };
+                e.stopPropagation();
+            };
+
+            plateItem.ondragend = function () {
+                plateItem.classList.remove('dragging');
+            };
+
+            plate.appendChild(plateItem);
+
+            let ingredientName;
+            if (ingredientType === 'egg_cooked') {
+                ingredientName = 'FriedEgg';
+            } else if (ingredientType === 'chicken_cooked') {
+                ingredientName = 'FriedChicken';
+            } else {
+                ingredientName = ingredientType.charAt(0).toUpperCase() + ingredientType.slice(1);
+            }
+
+            plateIngredients.push(ingredientName);
+
+        }
+
+        function getIngredientPosition(ingredientType, plate) {
+            const itemsOnPlate = plate.querySelectorAll('.cooked-item').length;
+            const itemsOfSameType = Array.from(plate.querySelectorAll('.cooked-item'))
+                .filter(item => item.dataset.type.toLowerCase().includes(ingredientType.replace('_cooked', ''))).length;
+
+            const exactPositions = {
+                'egg_cooked': [
+                    { left: 'calc(50% - 20px)', top: 'calc(50% - 15px)', zIndex: 13 },
+                    { left: 'calc(50% + 20px)', top: 'calc(50% - 15px)', zIndex: 13 }
+                ],
+                'chicken_cooked': [
+                    { left: 'calc(50% - 25px)', top: 'calc(50% + 10px)', zIndex: 17 },
+                    { left: 'calc(50% + 25px)', top: 'calc(50% + 10px)', zIndex: 17 }
+                ],
+                'rice': [
+                    { left: 'calc(50% - -15px)', top: 'calc(50% - 25px)', zIndex: 11 }, //bigger=left&low
+                    { left: 'calc(50% + 0px)', top: 'calc(50% - 25px)', zIndex: 11 },
+                    { left: 'calc(50% + 35px)', top: 'calc(50% - 25px)', zIndex: 11 }
+                ],
+                'cucumber': [
+                    { left: 'calc(50% - 70px)', top: 'calc(50% + 5px)', zIndex: 16 },
+                    { left: 'calc(50% + 70px)', top: 'calc(50% + 5px)', zIndex: 16 }
+                ],
+                'sambal': [
+                    { left: 'calc(50% - -40px)', top: 'calc(50% + -30px)', zIndex: 12 },
+                    { left: 'calc(50% + -40px)', top: 'calc(50% + -10px)', zIndex: 12 }
+                ],
+                'peanuts': [
+                    { left: 'calc(50% - 40px)', top: 'calc(50% - 5px)', zIndex: 15 },
+                    { left: 'calc(50% + 40px)', top: 'calc(50% - 5px)', zIndex: 15 }
+                ],
+                'anchovies': [
+                    { left: 'calc(50% - -55px)', top: 'calc(50% - 10px)', zIndex: 14 },
+                    { left: 'calc(50% + -55px)', top: 'calc(50% - 10px)', zIndex: 14 }
+                ]
+            };
+
+            const positions = exactPositions[ingredientType];
+            if (positions && itemsOfSameType < positions.length) {
+                return positions[itemsOfSameType];
+            }
+
+            return {
+                left: `calc(50% + ${(itemsOnPlate % 3) * 30 - 30}px)`,
+                top: `calc(50% + ${Math.floor(itemsOnPlate / 3) * -20}px)`,
+                zIndex: 10
+            };
+        }
+
+        function resetPlateSystem() {
+            if (plateOnTable) {
+                plateOnTable.remove();
+                plateOnTable = null;
+            }
+            plateIngredients = [];
+
+        }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+            if (!ev.currentTarget.classList.contains('trash-can')) {
+                ev.currentTarget.classList.add('active');
+            }
+        }
+
+        function dragContainer(ev) {
+            const ingredientType = ev.target.getAttribute('data-type');
+            ev.dataTransfer.setData("text/plain", ingredientType);
+            ev.target.classList.add('dragging');
+
+            const ghostImg = new Image();
+            if (ingredientType === 'chicken') ghostImg.src = 'RawChicken.png';
+            else if (ingredientType === 'egg') ghostImg.src = 'EggWithShell.png';
+            else if (ingredientType === 'rice') ghostImg.src = 'Rice.png';
+            else if (ingredientType === 'cucumber') ghostImg.src = 'Cucumber.png';
+            else if (ingredientType === 'sambal') ghostImg.src = 'Sambal.png';
+            else if (ingredientType === 'peanuts') ghostImg.src = 'Peanuts.png';
+            else if (ingredientType === 'anchovies') ghostImg.src = 'Anchovies.png';
+
+            ghostImg.onload = function () {
+                ev.dataTransfer.setDragImage(ghostImg, 25, 25);
+            };
+            ev.stopPropagation();
+        }
+
+        function dropIngredient(ev) {
+            ev.preventDefault();
+            ev.currentTarget.classList.remove('active');
+
+            const ingredientType = ev.dataTransfer.getData("text/plain");
+            const isCookable = ingredientType === 'egg' || ingredientType === 'chicken';
+
+            if (!isCookable) {
+                alert('This ingredient does not need cooking!');
+                return;
+            }
+
+            if (isCookable) {
+                startCooking(ingredientType, ev.currentTarget);
+            }
+
+            const draggingElement = document.querySelector('.dragging');
+            if (draggingElement) {
+                draggingElement.classList.remove('dragging');
+            }
+        }
+
+        function getIngredientImage(type) {
+            const images = {
+                'chicken': 'RawChicken.png',
+                'egg': 'EggWithShell.png',
+                'rice': 'Rice.png',
+                'cucumber': 'Cucumber.png',
+                'sambal': 'Sambal.png',
+                'peanuts': 'Peanuts.png',
+                'anchovies': 'Anchovies.png'
+            };
+            return images[type];
+        }
+
+        function startCooking(ingredientType, pan) {
+            const existingItems = pan.querySelectorAll('.cooked-item');
+
+            const verticalPositions = [
+                { top: '32%', left: '50%' },
+                { top: '52%', left: '50%' }
+            ];
+
+            const position = verticalPositions[existingItems.length % verticalPositions.length];
+
+            if (ingredientType === 'egg') {
+                const cookingItem = document.createElement('img');
+                cookingItem.src = 'RawEgg.png';
+                cookingItem.className = 'cooked-item';
+                cookingItem.dataset.type = 'egg';
+                cookingItem.dataset.state = 'raw';
+                cookingItem.id = 'cooking-' + Date.now();
+
+                cookingItem.style.position = 'absolute';
+                cookingItem.style.top = position.top;
+                cookingItem.style.left = position.left;
+                cookingItem.style.transform = 'translate(-50%, -50%)';
+                cookingItem.style.zIndex = existingItems.length + 100;
+
+                pan.appendChild(cookingItem);
+
+                const timerElement = document.createElement('div');
+                timerElement.className = 'cooking-timer';
+                timerElement.textContent = '5s';
+                cookingItem.appendChild(timerElement);
+
+                let timeLeft = 5;
+                const timer = setInterval(() => {
+                    timeLeft--;
+                    timerElement.textContent = timeLeft + 's';
+
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        cookingItem.src = 'FriedEgg.png';
+                        cookingItem.dataset.state = 'cooked';
+                        cookingItem.draggable = true;
+                        cookingItem.style.cursor = 'grab';
+
+                        cookingItem.ondragstart = (e) => {
+                            e.dataTransfer.setData("text/plain", 'egg_cooked');
+                            cookingItem.classList.add('dragging');
+
+                            const ghostImg = new Image();
+                            ghostImg.src = 'FriedEgg.png';
+                            ghostImg.onload = function () {
+                                e.dataTransfer.setDragImage(ghostImg, ghostImg.width / 2, ghostImg.height / 2);
+                            };
+                        };
+
+                        cookingItem.ondragend = function (e) {
+                            cookingItem.classList.remove('dragging');
+
+                            const plate = document.getElementById('tablePlate');
+                            if (plate) {
+                                const rect = plate.getBoundingClientRect();
+                                if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                                    e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                                    cookingItem.remove();
+                                }
+                            }
+
+
+                            document.querySelectorAll('.drop-zone').forEach(zone => {
+                                zone.classList.remove('active');
+                            });
+                        };
+
+                        timerElement.remove();
+                    }
+                }, 1000);
+            }
+
+            if (ingredientType === 'chicken') {
+                const cookingItem = document.createElement('img');
+                cookingItem.src = 'RawChicken.png';
+                cookingItem.className = 'cooked-item';
+                cookingItem.dataset.type = 'chicken';
+                cookingItem.dataset.state = 'raw';
+                cookingItem.id = 'cooking-' + Date.now();
+
+                cookingItem.style.position = 'absolute';
+                cookingItem.style.top = position.top;
+                cookingItem.style.left = position.left;
+                cookingItem.style.transform = 'translate(-50%, -50%)';
+                cookingItem.style.zIndex = existingItems.length + 100;
+
+                pan.appendChild(cookingItem);
+
+                const timerElement = document.createElement('div');
+                timerElement.className = 'cooking-timer';
+                timerElement.textContent = '5s';
+                cookingItem.appendChild(timerElement);
+
+                let timeLeft = 5;
+                const timer = setInterval(() => {
+                    timeLeft--;
+                    timerElement.textContent = timeLeft + 's';
+
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        cookingItem.src = 'FriedChicken.png';
+                        cookingItem.dataset.state = 'cooked';
+                        cookingItem.draggable = true;
+                        cookingItem.style.cursor = 'grab';
+
+                        cookingItem.ondragstart = (e) => {
+                            e.dataTransfer.setData("text/plain", 'chicken_cooked');
+                            cookingItem.classList.add('dragging');
+
+                            const ghostImg = new Image();
+                            ghostImg.src = 'FriedChicken.png';
+                            ghostImg.onload = function () {
+                                e.dataTransfer.setDragImage(ghostImg, ghostImg.width / 2, ghostImg.height / 2);
+                            };
+                        };
+
+                        cookingItem.ondragend = function (e) {
+                            cookingItem.classList.remove('dragging');
+
+                            const plate = document.getElementById('tablePlate');
+                            if (plate) {
+                                const rect = plate.getBoundingClientRect();
+                                if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                                    e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                                    cookingItem.remove();
+                                }
+                            }
+
+
+                            document.querySelectorAll('.drop-zone').forEach(zone => {
+                                zone.classList.remove('active');
+                            });
+                        };
+
+                        timerElement.remove();
+                    }
+                }, 1000);
+            }
+        }
+
+        function serveFood() {
+            if (!currentCustomer) {
+                alert('No customer to serve!');
+                return;
+            }
+
+            if (plateIngredients.length === 0) {
+                alert('Plate is empty! Add some ingredients.');
+                return;
+            }
+
+            const orderCorrect = checkOrderCorrect();
+
+            if (orderCorrect) {
+                score += 100;
+                customersServed++;
+                document.getElementById('score').textContent = score;
+                document.getElementById('customersServed').textContent = customersServed;
+
+                document.getElementById('dialogBox').style.display = 'none';
+
+                startCustomerMovementSequence();
+            } else {
+                alert('Wrong order! Check the customer\'s request.');
+            }
+        }
+
+        function startCustomerMovementSequence() {
+            const currentCustomerElement = document.getElementById('currentCustomer');
+            const queueElement = document.getElementById('customerQueue');
+
+            // 1st customer exits to right
+            currentCustomerElement.style.left = 'calc(100% + 200px)';
+            currentCustomerElement.style.opacity = '0';
+
+            // When 1st customer leaves, move 2nd customer from queue to current position
+            if (customerQueue.length > 0) {
+                setTimeout(() => {
+                    moveQueuedCustomerToCurrentPosition();
+                }, 500);
+            }
+
+            setTimeout(() => {
+                serveNextCustomer();
+                resetPlateSystem();
+            }, 1000);
+        }
+
+        function moveQueuedCustomerToCurrentPosition() {
+            const queueElement = document.getElementById('customerQueue');
+            const queuedCustomer = queueElement.querySelector('.queued-customer');
+
+            if (queuedCustomer) {
+                // 2nd customer moves from queued position to current position (from right to left)
+                queuedCustomer.style.left = '300px'; // Start from queued position
+
+                setTimeout(() => {
+                    queuedCustomer.style.left = '20px'; // Move to current customer position (left side)
+                }, 50);
+
+                setTimeout(() => {
+                    const currentCustomerElement = document.getElementById('currentCustomer');
+
+                    if (customerQueue.length > 0) {
+                        currentCustomer = customerQueue.shift();
+                        currentCustomerElement.innerHTML = `<img src="${currentCustomer.type}" alt="Current Customer">`;
+                        currentCustomerElement.style.left = '20px';
+                        currentCustomerElement.style.opacity = '1';
+
+                        showOrderDialog();
+                    }
+                    updateCustomerQueue();
+                    queuedCustomer.remove();
+                }, 800);
+            }
+        }
+
+
+        function spawnNewCustomerFromLeft() {
+            const queueElement = document.getElementById('customerQueue');
+            const newCustomer = document.createElement('div');
+            newCustomer.className = 'queued-customer';
+            newCustomer.style.left = '-100px';
+            newCustomer.style.opacity = '1';
+            newCustomer.style.transition = 'all 0.8s ease';
+
+            const customerType = customerTypes[Math.floor(Math.random() * customerTypes.length)];
+            newCustomer.innerHTML = `<img src="${customerType}" alt="Customer">`;
+
+            queueElement.appendChild(newCustomer);
+
+            setTimeout(() => {
+                newCustomer.style.left = '150px';
+            }, 50);
+        }
+
+        function checkIfOrderComplete() {
+            if (!currentCustomer || !plateOnTable) return false;
+
+            if (plateIngredients.length !== currentCustomer.order.length) {
+                return false;
+            }
+
+            const plateSorted = [...plateIngredients].sort();
+            const orderSorted = [...currentCustomer.order].sort();
+
+            for (let i = 0; i < plateSorted.length; i++) {
+                if (plateSorted[i] !== orderSorted[i]) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        function checkOrderCorrect() {
+            if (plateIngredients.length !== currentCustomer.order.length) {
+                return false;
+            }
+
+            const plateSorted = [...plateIngredients].sort();
+            const orderSorted = [...currentCustomer.order].sort();
+
+            for (let i = 0; i < plateSorted.length; i++) {
+                if (plateSorted[i] !== orderSorted[i]) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        function dropOnTrash(ev) {
+            ev.preventDefault();
+            ev.currentTarget.classList.remove('active');
+
+            const ingredientType = ev.dataTransfer.getData("text/plain");
+
+            // If dragging a plate or ingredients, reset the plate system
+            if (ingredientType.includes('_cooked') ||
+                ['rice', 'cucumber', 'sambal', 'peanuts', 'anchovies'].includes(ingredientType)) {
+
+                // Remove the dragged element if it exists
+                const draggingElement = document.querySelector('.dragging');
+                if (draggingElement) {
+                    draggingElement.remove();
+                }
+
+                // Reset the entire plate system
+                resetPlateSystem();
+
+                // Optional: Add some visual feedback
+                const trashCan = document.getElementById('trashCan');
+                trashCan.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    trashCan.style.transform = 'scale(1)';
+                }, 300);
+            }
+
+            // Remove dragging class
+            const draggingElement = document.querySelector('.dragging');
+            if (draggingElement) {
+                draggingElement.classList.remove('dragging');
+            }
+        }
+
+        window.onload = initGame;
+
+        document.addEventListener('dragend', function () {
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.classList.remove('active');
+            });
+            document.querySelectorAll('.dragging').forEach(item => {
+                item.classList.remove('dragging');
+            });
+        });
+    </script>
+</body>
+</html>
